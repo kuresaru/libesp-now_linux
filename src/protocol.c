@@ -88,17 +88,22 @@ uint8_t esp_now_send(int sock_fd, const uint8_t *dest_mac, const uint8_t *data, 
 
 void esp_now_recv(int sock_fd, uint8_t **data, uint8_t *len, uint8_t **from_mac)
 {
-    int recv_len = recvfrom(sock_fd, recvbuf, sizeof(recvbuf), MSG_TRUNC, NULL, 0);
-    if (recv_len >= USERDATA_POSITION)
-    {
-        *from_mac = ((ieee80211_action_header_t *)(recvbuf + IEEE80211_ACTION_HEADER_POSITION))->src_mac;
-        if (memcmp(((ieee80211_action_header_t *)(sendbuf + IEEE80211_ACTION_HEADER_POSITION))->src_mac, *from_mac, 6))
-        {
-            *len = ((ieee80211_wireless_management_header_t *)(recvbuf + IEEE80211_WIRELESS_MANAGEMENT_HEADER_POSITION))->length - 6;
-            if (recv_len >= USERDATA_POSITION + *len)
-            {
-                *data = recvbuf + USERDATA_POSITION;
-                return;
+    int recv_len = 0;
+    while (recv_len != -1) {
+        recv_len = (int) recvfrom(sock_fd, recvbuf, sizeof(recvbuf), MSG_TRUNC, NULL, 0);
+        if (recv_len >= USERDATA_POSITION) {
+            *from_mac = ((ieee80211_action_header_t *) (recvbuf + IEEE80211_ACTION_HEADER_POSITION))->src_mac;
+            if (memcmp(
+                    ((ieee80211_action_header_t *) (sendbuf + IEEE80211_ACTION_HEADER_POSITION))->src_mac,
+                    *from_mac,
+                    6
+                    ) != 0) {
+                *len = ((ieee80211_wireless_management_header_t *)
+                        (recvbuf +IEEE80211_WIRELESS_MANAGEMENT_HEADER_POSITION))->length -6;
+                if (recv_len >= USERDATA_POSITION + *len) {
+                    *data = recvbuf + USERDATA_POSITION;
+                    return;
+                }
             }
         }
     }

@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include <unistd.h>
 #include <string.h>
 #include <assert.h>
@@ -130,4 +129,10 @@ void create_raw_socket(const char *dev, int *sock_fd_send, int *sock_fd_recv)
         *sock_fd_send = -1;
         *sock_fd_recv = -1;
     }
+}
+
+void close_raw_socket(const int sock_fd_send, const int sock_fd_recv)
+{
+    close(sock_fd_send);
+    shutdown(sock_fd_recv, SHUT_RDWR); // wakeup recvfrom and close
 }

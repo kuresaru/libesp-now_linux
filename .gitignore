@@ -1,3 +1,4 @@
 /.vscode/
-/*.o
-/espnow2tcp
+/.idea/
+*.o
+*.so
